@@ -51,7 +51,28 @@ from_string
 kokyaku_data['登録日'] = pd.concat([from_serial, from_string])
 kokyaku_data
 #%%
-kokyaku_data['登録年月'] = kokyaku_data['登録日'].dt.strftime('%y%m')
-result = kokyaku_data.groupby('登録日')
+kokyaku_data['登録年月'] = kokyaku_data['登録日'].dt.strftime('%Y%m')
+result = kokyaku_data.groupby('登録年月').count()['顧客名']
 print(result)
+print(len(kokyaku_data))
+# %%
+flg_is_serial = kokyaku_data['登録日'].astype('str').str.isdigit()
+flg_is_serial.sum()
+# %%
+join_data = pd.merge(uriage_data, kokyaku_data, left_on='customer_name', right_on='顧客名', how='left')
+join_data = join_data.drop('customer_name', axis=1)
+join_data
+# %%
+# ノック19
+dump_data = join_data[['purchase_date', 'purchase_month', 'item_name', 'item_price', '顧客名', 'かな', '地域', 'メールアドレス', '登録日', '登録年月']]
+dump_data
+# %%
+dump_data.to_csv('dump_data.csv', index=False)
+# %%
+# ノック20
+import_data = pd.read_csv('dump_data.csv')
+import_data
+# %%
+byItem = import_data.pivot_table(index='purchase_month', columns='item_name', aggfunc='size', fill_value='0')
+byItem
 # %%
